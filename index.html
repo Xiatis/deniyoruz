@@ -42,34 +42,71 @@
   <div class="track track--left"><ul class="row" id="row3"></ul></div>
 
 <script>
+  // Listeyi DOM'a basan küçük yardımcı
+  function fillRow(rowEl, list) {
+    // Asıl liste
+    list.forEach(file => {
+      const li = document.createElement('li');
+      li.className = 'item';
+      const img = document.createElement('img');
+      img.src = 'logos/' + file;
+      img.alt = file.replace(/\.png$/i,'');
+      li.appendChild(img);
+      rowEl.appendChild(li);
+    });
+    // Kopya liste (sonsuz akış için)
+    list.forEach(file => {
+      const li = document.createElement('li');
+      li.className = 'item';
+      const img = document.createElement('img');
+      img.src = 'logos/' + file;
+      img.alt = '';
+      li.appendChild(img);
+      rowEl.appendChild(li);
+    });
+  }
+
   fetch('logos.json')
     .then(res => res.json())
-    .then(logos => {
-      const rows = [document.getElementById('row1'), document.getElementById('row2'), document.getElementById('row3')];
-      rows.forEach(row => {
-        // Asıl liste
-        logos.forEach(file => {
-          const li = document.createElement('li');
-          li.className = 'item';
-          const img = document.createElement('img');
-          img.src = 'logos/' + file;
-          img.alt = file.replace('.png','');
-          li.appendChild(img);
-          row.appendChild(li);
+    .then(all => {
+      const row1 = document.getElementById('row1'); // üst (sola)
+      const row2 = document.getElementById('row2'); // orta (sağa)
+      const row3 = document.getElementById('row3'); // alt (sola)
+
+      const n  = all.length;
+      const a  = Math.ceil(n / 3);        // 1/3 sınırı
+      const b  = Math.ceil((2 * n) / 3);  // 2/3 sınırı
+
+      // 3 farklı parça (mümkün olduğunca eşit)
+      const part1 = all.slice(0, a);
+      const part2 = all.slice(a, b);
+      const part3 = all.slice(b);
+
+      // Eğer logo sayısı azsa, yedek plan: mod 3 ile dağıt (çakışmayı önler)
+      const tooSmall = n < 9;
+      if (tooSmall) {
+        const p1 = [], p2 = [], p3 = [];
+        all.forEach((f, i) => {
+          (i % 3 === 0 ? p1 : (i % 3 === 1 ? p2 : p3)).push(f);
         });
-        // Kopya liste (sonsuz akış için)
-        logos.forEach(file => {
-          const li = document.createElement('li');
-          li.className = 'item';
-          const img = document.createElement('img');
-          img.src = 'logos/' + file;
-          img.alt = '';
-          li.appendChild(img);
-          row.appendChild(li);
-        });
-      });
+        if (p1.length) { part1.splice(0, part1.length, ...p1); }
+        if (p2.length) { part2.splice(0, part2.length, ...p2); }
+        if (p3.length) { part3.splice(0, part3.length, ...p3); }
+      }
+
+      // Satırları doldur
+      fillRow(row1, part1);
+      fillRow(row2, part2);
+      fillRow(row3, part3);
+
+      // Her satır farklı bir noktadan başlasın (stagger)
+      // Negatif delay, animasyonu ortasından başlatır.
+      row1.style.animationDelay = '-2s';
+      row2.style.animationDelay = '-8s';
+      row3.style.animationDelay = '-14s';
     })
     .catch(err => console.error('Logolar yüklenemedi:', err));
 </script>
 </body>
 </html>
+
