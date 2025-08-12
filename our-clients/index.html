@@ -1,0 +1,75 @@
+<!doctype html>
+<html lang="tr">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Our Clients Carousel</title>
+<style>
+  :root{
+    --gap: clamp(22px, 3vw, 48px);
+    --logo-h: clamp(28px, 4.2vw, 44px);
+    --speed-left: 36s;
+    --speed-right: 32s;
+  }
+  body{margin:0; font-family:sans-serif; background:#fff; color:#111;}
+  h2{text-align:center; margin:20px 0 6px;}
+  .sub{text-align:center; color:#666; margin:0 0 20px;}
+  .track{
+    overflow:hidden;
+    --mask: linear-gradient(90deg, rgba(0,0,0,0) 0, #000 7%, #000 93%, rgba(0,0,0,0) 100%);
+    -webkit-mask-image: var(--mask);
+            mask-image: var(--mask);
+    margin:12px 0;
+  }
+  .row{
+    display:flex; align-items:center;
+    gap:var(--gap);
+    width:max-content;
+    animation: scroll-left var(--speed-left) linear infinite;
+  }
+  .track--right .row{animation-name:scroll-right; animation-duration:var(--speed-right);}
+  .item img{height:var(--logo-h); width:auto; display:block;}
+  @keyframes scroll-left{from{transform:translateX(0);} to{transform:translateX(-50%);}}
+  @keyframes scroll-right{from{transform:translateX(-50%);} to{transform:translateX(0);}}
+</style>
+</head>
+<body>
+  <h2>Our Clients</h2>
+  <p class="sub">Forward-thinking brands that trust us</p>
+
+  <div class="track track--left"><ul class="row" id="row1"></ul></div>
+  <div class="track track--right"><ul class="row" id="row2"></ul></div>
+  <div class="track track--left"><ul class="row" id="row3"></ul></div>
+
+<script>
+  fetch('logos.json')
+    .then(res => res.json())
+    .then(logos => {
+      const rows = [document.getElementById('row1'), document.getElementById('row2'), document.getElementById('row3')];
+      rows.forEach(row => {
+        // Asıl liste
+        logos.forEach(file => {
+          const li = document.createElement('li');
+          li.className = 'item';
+          const img = document.createElement('img');
+          img.src = 'logos/' + file;
+          img.alt = file.replace('.png','');
+          li.appendChild(img);
+          row.appendChild(li);
+        });
+        // Kopya liste (sonsuz akış için)
+        logos.forEach(file => {
+          const li = document.createElement('li');
+          li.className = 'item';
+          const img = document.createElement('img');
+          img.src = 'logos/' + file;
+          img.alt = '';
+          li.appendChild(img);
+          row.appendChild(li);
+        });
+      });
+    })
+    .catch(err => console.error('Logolar yüklenemedi:', err));
+</script>
+</body>
+</html>
